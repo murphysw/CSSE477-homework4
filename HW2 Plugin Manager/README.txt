@@ -1,0 +1,1 @@
+In order to add a new plugin to the system, simply place the .jar file into the plugins folder. The main class of the plugin must extend PluginInterface and define a getComponents method that returns a component to place in the execution panel. In order to install and run a plugin, click on its name in the left panel.

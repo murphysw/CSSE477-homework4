@@ -1,0 +1,3 @@
+name=spencer
+password=password
+stuff=morestuff

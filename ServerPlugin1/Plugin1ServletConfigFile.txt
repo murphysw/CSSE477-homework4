@@ -1,2 +1,2 @@
-GET	GetServlet	GetServlet.jar
-PUT	PutServlet	PutServlet.jar
+GET	GetServlet	servlets/GetServlet.jar
+PUT	PutServlet	servlets/PutServlet.jar

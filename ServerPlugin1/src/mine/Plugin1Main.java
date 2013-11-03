@@ -1,17 +1,25 @@
 package mine;
-
 import java.io.File;
 
 import plugin.AbstractPlugin;
+import protocol.HttpRequest;
+import protocol.HttpResponse;
 
 
 public class Plugin1Main extends AbstractPlugin {
 	
-	private final String pathToConfigFile = "Plugin1ServletConfigFile.txt";
+	private String configFile = "Plugin1ServletConfigFile.txt";
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		System.out.println("hello plugin");
+	}
 
 	@Override
 	public File getConfigFile() {
-		return new File(pathToConfigFile);
+		return new File(configFile);
 	}
 
 }

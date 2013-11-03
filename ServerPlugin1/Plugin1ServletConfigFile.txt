@@ -1,2 +1,1 @@
-GET	GetServlet	GetServlet.jar
-PUT	PutServlet	PutServlet.jar
+GET OnlyServlet	Plugin1Servlet1

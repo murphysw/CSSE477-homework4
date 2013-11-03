@@ -24,7 +24,7 @@ import protocol.HttpResponse;
  * 
  * @author Team Otherguys
  */
-public abstract class AbstractPlugin implements PluginInterface {
+abstract class AbstractPlugin implements PluginInterface {
 	
 	HashMap<String,AbstractServlet> servlets;
 	
@@ -43,8 +43,8 @@ public abstract class AbstractPlugin implements PluginInterface {
 			StringTokenizer st = new StringTokenizer(servletConfiguration," ");
 			String requestType = st.nextToken();
 			String servletName = st.nextToken();
-			String servletClass = st.nextToken();
-			/*try{
+			String servletPath = st.nextToken();
+			try{
 				File file = new File(servletPath); //This path will likely need to include .../plugins/<Plugin>/
 		        
 		        URI uri = file.toURI();
@@ -62,21 +62,7 @@ public abstract class AbstractPlugin implements PluginInterface {
 		        classLoader.close(); //This might remove the class, but it warns us if we don't have it
 		    } catch (Exception e) {
 		        e.printStackTrace();
-		    } */
-			try {
-				Class sClass = Class.forName(servletClass);
-				AbstractServlet servlet = (AbstractServlet) sClass.newInstance();
-				servlets.put(servletName, servlet);
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		    } 
 		}
 	}
 
@@ -85,10 +71,10 @@ public abstract class AbstractPlugin implements PluginInterface {
 	 */
 	public abstract File getConfigFile();
 
-	public HttpResponse service(HttpRequest request){
+	public void service(HttpRequest request, HttpResponse response){
 		String uri = request.getUri();
 		String servletKey = uri.substring(uri.lastIndexOf('/'));
 		AbstractServlet servlet = servlets.get(servletKey);
-		return servlet.service(request);
+		servlet.service(request,response);
 	}
 }

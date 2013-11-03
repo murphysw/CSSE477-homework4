@@ -36,7 +36,7 @@ public class MainTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		foo.service(request, null);
+		//foo.service(request, null);
 	}
 
 }

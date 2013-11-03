@@ -15,5 +15,5 @@ public interface PluginInterface {
 	
 	public abstract File getConfigFile();
 	
-	public abstract void service(HttpRequest request, HttpResponse response);
+	public abstract HttpResponse service(HttpRequest request);
 }

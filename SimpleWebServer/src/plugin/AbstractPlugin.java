@@ -26,10 +26,10 @@ import protocol.HttpResponse;
  */
 abstract class AbstractPlugin implements PluginInterface {
 	
-	HashMap<String,ServletInterface> servlets;
+	HashMap<String,AbstractServlet> servlets;
 	
 	public AbstractPlugin(){
-		servlets = new HashMap<String,ServletInterface>();
+		servlets = new HashMap<String,AbstractServlet>();
 		File servletsFile = getConfigFile();
 		Scanner scan;
 		try{
@@ -56,7 +56,7 @@ abstract class AbstractPlugin implements PluginInterface {
 		        if(main != null)
 		        {
 					Class<?> aClass = classLoader.loadClass(main);
-					ServletInterface servlet = (ServletInterface)aClass.newInstance();
+					AbstractServlet servlet = (AbstractServlet)aClass.newInstance();
 					servlets.put(servletName, servlet);
 		        }
 		        classLoader.close(); //This might remove the class, but it warns us if we don't have it
@@ -74,7 +74,7 @@ abstract class AbstractPlugin implements PluginInterface {
 	public void service(HttpRequest request, HttpResponse response){
 		String uri = request.getUri();
 		String servletKey = uri.substring(uri.lastIndexOf('/'));
-		ServletInterface servlet = servlets.get(servletKey);
+		AbstractServlet servlet = servlets.get(servletKey);
 		servlet.service(request,response);
 	}
 }

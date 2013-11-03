@@ -23,9 +23,12 @@ package server;
 
 import gui.WebServer;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import plugin.PluginManager;
 
 /**
  * This represents a welcoming server for the incoming
@@ -43,6 +46,7 @@ public class Server implements Runnable {
 	private long serviceTime;
 	
 	private WebServer window;
+	private PluginManager manager;
 	/**
 	 * @param rootDirectory
 	 * @param port
@@ -54,6 +58,15 @@ public class Server implements Runnable {
 		this.connections = 0;
 		this.serviceTime = 0;
 		this.window = window;
+		try {
+			this.manager = new PluginManager(rootDirectory);
+			new Thread(manager).start();
+			System.out.println("Made it back to here");
+//			this.manager.watch();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -129,7 +142,9 @@ public class Server implements Runnable {
 					break;
 				
 				// Create a handler for this incoming connection and start the handler in a new thread
+				
 				ConnectionHandler handler = new ConnectionHandler(this, connectionSocket);
+				
 				new Thread(handler).start();
 			}
 			this.welcomeSocket.close();

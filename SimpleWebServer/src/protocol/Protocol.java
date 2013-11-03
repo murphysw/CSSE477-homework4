@@ -57,6 +57,9 @@ public class Protocol {
     public static final int NOT_FOUND_CODE = 404;
     public static final String NOT_FOUND_TEXT = "Not Found";
     
+    public static final int METHOD_NOT_ALLOWED = 405;
+    public static final String METHOD_NOT_ALLOWED_TEXT = "Method not allowed";
+    
     public static final int NOT_SUPPORTED_CODE = 505;
     public static final String NOT_SUPPORTED_TEXT = "HTTP Version Not Supported";
     
@@ -74,6 +77,7 @@ public class Protocol {
     public static final String LAST_MODIFIED = "Last-Modified";
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CONTENT_TYPE = "Content-Type";
+    public static final String ALLOW = "Allow";
     
     /**
      * A chunk size to be used when reading a file and sending it to a socket. 

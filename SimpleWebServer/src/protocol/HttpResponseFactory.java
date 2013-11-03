@@ -130,6 +130,25 @@ public class HttpResponseFactory {
 	}
 	
 	/**
+	 * Creates a {@link HttpResponse} object for sending method not allowed response.
+	 * 
+	 * @param allowedMethods 
+	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.
+	 * @return A {@link HttpResponse} object represent 405 status.
+	 */
+	public static HttpResponse create405MethodNotAllowed(String allowedMethods, String connection) {
+		HttpResponse response = new HttpResponse(Protocol.VERSION, Protocol.METHOD_NOT_ALLOWED, 
+				Protocol.METHOD_NOT_ALLOWED_TEXT, new HashMap<String, String>(), null);
+		
+		// Lets fill up the header fields with more information
+		fillGeneralHeader(response, connection);
+		response.put(Protocol.ALLOW, allowedMethods);
+		
+		return response;	
+	}
+	
+	
+	/**
 	 * Creates a {@link HttpResponse} object for sending version not supported response.
 	 * 
 	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.

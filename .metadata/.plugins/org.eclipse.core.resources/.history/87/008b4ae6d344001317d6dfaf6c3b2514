@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.html>.
  * 
  */
-
+ 
 package server;
 
 import java.io.File;
@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Map;
 
 import protocol.HttpRequest;
@@ -36,23 +35,22 @@ import protocol.Protocol;
 import protocol.ProtocolException;
 
 /**
- * This class is responsible for handling a incoming request by creating a
- * {@link HttpRequest} object and sending the appropriate response be creating a
- * {@link HttpResponse} object. It implements {@link Runnable} to be used in
- * multi-threaded environment.
+ * This class is responsible for handling a incoming request
+ * by creating a {@link HttpRequest} object and sending the appropriate
+ * response be creating a {@link HttpResponse} object. It implements
+ * {@link Runnable} to be used in multi-threaded environment.
  * 
  * @author Chandan R. Rupakheti (rupakhet@rose-hulman.edu)
  */
 public class ConnectionHandler implements Runnable {
 	private Server server;
 	private Socket socket;
-	private ArrayList<String> methodList;
-
+	
 	public ConnectionHandler(Server server, Socket socket) {
 		this.server = server;
 		this.socket = socket;
 	}
-
+	
 	/**
 	 * @return the socket
 	 */
@@ -60,11 +58,12 @@ public class ConnectionHandler implements Runnable {
 		return socket;
 	}
 
+
 	/**
-	 * The entry point for connection handler. It first parses incoming request
-	 * and creates a {@link HttpRequest} object, then it creates an appropriate
-	 * {@link HttpResponse} object and sends the response back to the client
-	 * (web browser).
+	 * The entry point for connection handler. It first parses
+	 * incoming request and creates a {@link HttpRequest} object,
+	 * then it creates an appropriate {@link HttpResponse} object
+	 * and sends the response back to the client (web browser).
 	 */
 	public void run() {
 		// Get the start time
@@ -154,12 +153,7 @@ public class ConnectionHandler implements Runnable {
 //				
 				// Handling GET request here
 				// Get relative URI path from request
-				addMethod(request.getMethod().toString().toUpperCase());
-				if(checkForMethodOverload(request.getMethod().toString().toUpperCase())){
-					response = HttpResponseFactory.create503ServiceUnavaliable(Protocol.CLOSE);
-				}
 				String uri = request.getUri();
-				
 				// Get root directory path from server
 				String rootDirectory = server.getRootDirectory();
 				// Combine them together to form absolute file path
@@ -170,102 +164,27 @@ public class ConnectionHandler implements Runnable {
 						// Look for default index.html file in a directory
 						String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
 						file = new File(location);
-				boolean plugin = checkForPlugin(request);
-				if(plugin){
-					response = handlePluginRequest(request);
+						if(file.exists()) {
+							// Lets create 200 OK response
+							response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+						}
+						else {
+							// File does not exist so lets create 404 file not found code
+							response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+						}
+					}
+					else { // Its a file
+						// Lets create 200 OK response
+						response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+					}
 				}
-					}}}
-				else 
-					if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
-		//				Map<String, String> header = request.getHeader();
-		//				String date = header.get("if-modified-since");
-		//				String hostName = header.get("host");
-		//				
-						// Handling GET request here
-						// Get relative URI path from request
-						String uri = request.getUri();
-						// Get root directory path from server
-						String rootDirectory = server.getRootDirectory();
-						// Combine them together to form absolute file path
-						File file = new File(rootDirectory + uri);
-						// Check if the file exists
-						if(file.exists()) {
-							if(file.isDirectory()) {
-								// Look for default index.html file in a directory
-								String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
-								file = new File(location);
-								if(file.exists()) {
-									// Lets create 200 OK response
-									response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
-								}
-								else {
-									// File does not exist so lets create 404 file not found code
-									response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-								}
-							}
-							else { // Its a file
-								// Lets create 200 OK response
-								response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
-							}
-						}
-						else {
-							// File does not exist so lets create 404 file not found code
-							response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-						}
-					}
-					else if(request.getMethod().equalsIgnoreCase(Protocol.POST)) {
-						// Get relative uri path from Request
-						String uri = request.getUri();
-						// Get root directory from server
-						String rootDirectory = server.getRootDirectory();
-						// Combine them together to form absolute file path
-						File file = new File(rootDirectory + uri);
-						// Check if file exists
-						if(file.exists()) {
-							if(file.isDirectory()) {
-								// Look for default index.html file in a directory
-								String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
-								file = new File(location);
-								if(file.exists()) {
-									// use the post information
-									PrintWriter writer = new PrintWriter(location + ".put.txt", "UTF-8");
-									writer.println(request.getBody());
-									writer.close();
-									
-									// Lets create 200 OK response
-									response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
-								}
-								else {
-									// File does not exist so lets create 404 file not found code
-									response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-								}
-							}
-							else { // Its a file
-								// write put info to a file to be used later
-								PrintWriter writer = new PrintWriter(file.getAbsolutePath() + ".post.txt", "UTF-8");
-								writer.println(request.getBody());
-								writer.close();
-								
-								// Lets create 200 OK response
-								response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
-							}
-						}
-						else {
-							// File does not exist so lets create 404 file not found code
-							response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-						}
-					}
 				else {
 					// File does not exist so lets create 404 file not found code
 					response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 				}
-		}
+			}
 			else if(request.getMethod().equalsIgnoreCase(Protocol.POST)) {
 				// Get relative uri path from Request
-				addMethod(request.getMethod().toString().toUpperCase());
-				if(checkForMethodOverload(request.getMethod().toString().toUpperCase())){
-					response = HttpResponseFactory.create503ServiceUnavaliable(Protocol.CLOSE);
-				}
 				String uri = request.getUri();
 				// Get root directory from server
 				String rootDirectory = server.getRootDirectory();
@@ -277,67 +196,28 @@ public class ConnectionHandler implements Runnable {
 						// Look for default index.html file in a directory
 						String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
 						file = new File(location);
-					}
-					else if(request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
-						// Get relative uri path from Request
-						String uri = request.getUri();
-						// Get root directory from server
-						String rootDirectory = server.getRootDirectory();
-						// Combine them together to form absolute file path
-						File file = new File(rootDirectory + uri);
-						
-						// Check if file exists
-
 						if(file.exists()) {
+							// use the post information
+							PrintWriter writer = new PrintWriter(location + ".put.txt", "UTF-8");
+							writer.println(request.getBody());
+							writer.close();
+							
 							// Lets create 200 OK response
 							response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
-						}
-						else {					
-							// Lets create 201 Created response
-							response = HttpResponseFactory.create201Created(file, Protocol.CLOSE);
-						}
-						
-						// put the body of the request into the file location
-						PrintWriter writer = new PrintWriter(file.getAbsolutePath(), "UTF-8");
-						writer.println(request.getBody());
-						writer.close();
-					}
-					else if(request.getMethod().equalsIgnoreCase(Protocol.DELETE)) {
-						// Get relative uri path from Request
-						String uri = request.getUri();
-						// Get root directory from server
-						String rootDirectory = server.getRootDirectory();
-						// Combine them together to form absolute file path
-						File file = new File(rootDirectory + uri);
-						// Check if file exists
-						if(file.exists()) {
-							// Its a file
-							//delete the file
-							try{			 
-					    		if(file.delete()){
-					    			// Lets create 200 OK response
-									response = HttpResponseFactory.create200OK(null, Protocol.CLOSE);
-								}else{
-									
-									// For any other error, we will create bad request response as well
-									response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
-					    		}
-					 
-					    	}catch(Exception e){
-					 
-					    		e.printStackTrace();
-					    		// For any other error, we will create bad request response as well
-								response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
-					    	}
 						}
 						else {
 							// File does not exist so lets create 404 file not found code
 							response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 						}
 					}
-					else {
-						// File does not exist so lets create 404 file not found code
-						response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+					else { // Its a file
+						// write put info to a file to be used later
+						PrintWriter writer = new PrintWriter(file.getAbsolutePath() + ".post.txt", "UTF-8");
+						writer.println(request.getBody());
+						writer.close();
+						
+						// Lets create 200 OK response
+						response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
 					}
 				}
 				else {
@@ -347,10 +227,6 @@ public class ConnectionHandler implements Runnable {
 			}
 			else if(request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
 				// Get relative uri path from Request
-				addMethod(request.getMethod().toString().toUpperCase());
-				if(checkForMethodOverload(request.getMethod().toString().toUpperCase())){
-					response = HttpResponseFactory.create503ServiceUnavaliable(Protocol.CLOSE);
-				}
 				String uri = request.getUri();
 				// Get root directory from server
 				String rootDirectory = server.getRootDirectory();
@@ -374,10 +250,6 @@ public class ConnectionHandler implements Runnable {
 			}
 			else if(request.getMethod().equalsIgnoreCase(Protocol.DELETE)) {
 				// Get relative uri path from Request
-				addMethod(request.getMethod().toString().toUpperCase());
-				if(checkForMethodOverload(request.getMethod().toString().toUpperCase())){
-					response = HttpResponseFactory.create503ServiceUnavaliable(Protocol.CLOSE);
-				}
 				String uri = request.getUri();
 				// Get root directory from server
 				String rootDirectory = server.getRootDirectory();
@@ -413,9 +285,7 @@ public class ConnectionHandler implements Runnable {
 				// File does not exist so lets create 404 file not found code
 				response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 			}
-			}
-					}
-
+		}
 		catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -431,7 +301,6 @@ public class ConnectionHandler implements Runnable {
 		try{
 			// Write response and we are all done so close the socket
 			response.write(outStream);
-			
 //			System.out.println(response);
 			socket.close();
 		}
@@ -445,46 +314,5 @@ public class ConnectionHandler implements Runnable {
 		// Get the end time
 		long end = System.currentTimeMillis();
 		this.server.incrementServiceTime(end-start);
-	}
-
-	private void addMethod(String method) {
-		this.methodList.add(method);
-	}
-
-	private boolean checkForMethodOverload(String method) {
-		int overloadAmount = 0;
-		for (int i = 0; i < this.methodList.size(); i++) {
-			if (this.methodList.contains(method)) {
-				overloadAmount++;
-			}
-			if (overloadAmount == 5) {
-
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * @param request
-	 * @return
-	 */
-	private HttpResponse handlePluginRequest(HttpRequest request) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * @param request
-	 * @return
-	 */
-	private boolean checkForPlugin(HttpRequest request) {
-		try {
-			String plugin = request.getUri().split("/")[0];
-			String relativeURI = request.getUri().split("/")[1];
-		} catch (IndexOutOfBoundsException e) {
-			return false;
-		}
-		return false;
 	}
 }

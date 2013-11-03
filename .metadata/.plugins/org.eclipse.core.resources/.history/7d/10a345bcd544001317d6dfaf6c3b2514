@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.html>.
  * 
  */
-
+ 
 package server;
 
 import java.io.File;
@@ -36,10 +36,10 @@ import protocol.Protocol;
 import protocol.ProtocolException;
 
 /**
- * This class is responsible for handling a incoming request by creating a
- * {@link HttpRequest} object and sending the appropriate response be creating a
- * {@link HttpResponse} object. It implements {@link Runnable} to be used in
- * multi-threaded environment.
+ * This class is responsible for handling a incoming request
+ * by creating a {@link HttpRequest} object and sending the appropriate
+ * response be creating a {@link HttpResponse} object. It implements
+ * {@link Runnable} to be used in multi-threaded environment.
  * 
  * @author Chandan R. Rupakheti (rupakhet@rose-hulman.edu)
  */
@@ -47,12 +47,12 @@ public class ConnectionHandler implements Runnable {
 	private Server server;
 	private Socket socket;
 	private ArrayList<String> methodList;
-
+	
 	public ConnectionHandler(Server server, Socket socket) {
 		this.server = server;
 		this.socket = socket;
 	}
-
+	
 	/**
 	 * @return the socket
 	 */
@@ -60,11 +60,12 @@ public class ConnectionHandler implements Runnable {
 		return socket;
 	}
 
+
 	/**
-	 * The entry point for connection handler. It first parses incoming request
-	 * and creates a {@link HttpRequest} object, then it creates an appropriate
-	 * {@link HttpResponse} object and sends the response back to the client
-	 * (web browser).
+	 * The entry point for connection handler. It first parses
+	 * incoming request and creates a {@link HttpRequest} object,
+	 * then it creates an appropriate {@link HttpResponse} object
+	 * and sends the response back to the client (web browser).
 	 */
 	public void run() {
 		// Get the start time
@@ -147,6 +148,7 @@ public class ConnectionHandler implements Runnable {
 				// DONE: Fill in the rest of the code here
 				response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
 			}
+<<<<<<< HEAD
 			else if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
 //				Map<String, String> header = request.getHeader();
 //				String date = header.get("if-modified-since");
@@ -170,12 +172,13 @@ public class ConnectionHandler implements Runnable {
 						// Look for default index.html file in a directory
 						String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
 						file = new File(location);
+=======
+			else{
 				boolean plugin = checkForPlugin(request);
 				if(plugin){
 					response = handlePluginRequest(request);
 				}
-					}}}
-				else 
+				else {
 					if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
 		//				Map<String, String> header = request.getHeader();
 		//				String date = header.get("if-modified-since");
@@ -189,6 +192,7 @@ public class ConnectionHandler implements Runnable {
 						// Combine them together to form absolute file path
 						File file = new File(rootDirectory + uri);
 						// Check if the file exists
+>>>>>>> d2a1e4ef21784d403a7654669f8ed09f7994ca05
 						if(file.exists()) {
 							if(file.isDirectory()) {
 								// Look for default index.html file in a directory
@@ -255,11 +259,13 @@ public class ConnectionHandler implements Runnable {
 							response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 						}
 					}
+<<<<<<< HEAD
+				}
 				else {
 					// File does not exist so lets create 404 file not found code
 					response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 				}
-		}
+			}
 			else if(request.getMethod().equalsIgnoreCase(Protocol.POST)) {
 				// Get relative uri path from Request
 				addMethod(request.getMethod().toString().toUpperCase());
@@ -277,7 +283,7 @@ public class ConnectionHandler implements Runnable {
 						// Look for default index.html file in a directory
 						String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
 						file = new File(location);
-					}
+=======
 					else if(request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
 						// Get relative uri path from Request
 						String uri = request.getUri();
@@ -287,7 +293,7 @@ public class ConnectionHandler implements Runnable {
 						File file = new File(rootDirectory + uri);
 						
 						// Check if file exists
-
+>>>>>>> d2a1e4ef21784d403a7654669f8ed09f7994ca05
 						if(file.exists()) {
 							// Lets create 200 OK response
 							response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
@@ -340,6 +346,7 @@ public class ConnectionHandler implements Runnable {
 						response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 					}
 				}
+<<<<<<< HEAD
 				else {
 					// File does not exist so lets create 404 file not found code
 					response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
@@ -412,10 +419,10 @@ public class ConnectionHandler implements Runnable {
 			else {
 				// File does not exist so lets create 404 file not found code
 				response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+=======
+>>>>>>> d2a1e4ef21784d403a7654669f8ed09f7994ca05
 			}
-			}
-					}
-
+		}
 		catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -446,24 +453,22 @@ public class ConnectionHandler implements Runnable {
 		long end = System.currentTimeMillis();
 		this.server.incrementServiceTime(end-start);
 	}
-
-	private void addMethod(String method) {
+<<<<<<< HEAD
+	private void addMethod(String method){
 		this.methodList.add(method);
 	}
-
-	private boolean checkForMethodOverload(String method) {
+	
+	private boolean checkForMethodOverload(String method){
 		int overloadAmount = 0;
-		for (int i = 0; i < this.methodList.size(); i++) {
-			if (this.methodList.contains(method)) {
+		for(int i = 0; i < this.methodList.size(); i++){
+			if (this.methodList.contains(method)){
 				overloadAmount++;
 			}
-			if (overloadAmount == 5) {
-
+			if (overloadAmount == 5){
+				
 				return true;
 			}
-		}
-		return false;
-	}
+=======
 
 	/**
 	 * @param request
@@ -479,11 +484,13 @@ public class ConnectionHandler implements Runnable {
 	 * @return
 	 */
 	private boolean checkForPlugin(HttpRequest request) {
-		try {
+		try{
 			String plugin = request.getUri().split("/")[0];
 			String relativeURI = request.getUri().split("/")[1];
-		} catch (IndexOutOfBoundsException e) {
+		}
+		catch (IndexOutOfBoundsException e){
 			return false;
+>>>>>>> d2a1e4ef21784d403a7654669f8ed09f7994ca05
 		}
 		return false;
 	}

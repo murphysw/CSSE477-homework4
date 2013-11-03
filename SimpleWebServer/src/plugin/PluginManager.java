@@ -212,5 +212,20 @@ public class PluginManager implements Runnable {
 		watch();
 
 	}
+	
+	public Map<String, PluginInterface> getPlugins(){
+		return this.plugins;
+	}
+
+	/**
+	 * @param plugin
+	 * @return
+	 */
+	public boolean checkForPlugin(String plugin) {
+		if (plugins.containsKey(plugin)){
+			return true;
+		}
+		return false;
+	}
 
 }

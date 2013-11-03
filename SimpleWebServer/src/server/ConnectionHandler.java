@@ -28,6 +28,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Map;
 
+import plugin.PluginInterface;
+import plugin.PluginManager;
 import protocol.HttpRequest;
 import protocol.HttpResponse;
 import protocol.HttpResponseFactory;
@@ -45,10 +47,12 @@ import protocol.ProtocolException;
 public class ConnectionHandler implements Runnable {
 	private Server server;
 	private Socket socket;
+	private PluginManager manager;
 	
-	public ConnectionHandler(Server server, Socket socket) {
+	public ConnectionHandler(Server server, Socket socket, PluginManager manager) {
 		this.server = server;
 		this.socket = socket;
+		this.manager = manager;
 	}
 	
 	/**
@@ -329,8 +333,10 @@ public class ConnectionHandler implements Runnable {
 	 * @return
 	 */
 	private HttpResponse handlePluginRequest(HttpRequest request) {
-		// TODO Auto-generated method stub
-		return null;
+		String pluginName = request.getUri().split("/")[0];
+		
+		PluginInterface plugin = manager.getPlugins().get(pluginName);
+		return plugin.service(request);
 	}
 
 	/**
@@ -338,13 +344,7 @@ public class ConnectionHandler implements Runnable {
 	 * @return
 	 */
 	private boolean checkForPlugin(HttpRequest request) {
-		try{
-			String plugin = request.getUri().split("/")[0];
-			String relativeURI = request.getUri().split("/")[1];
-		}
-		catch (IndexOutOfBoundsException e){
-			return false;
-		}
-		return false;
+		String plugin = request.getUri().split("/")[0];
+		return manager.checkForPlugin(plugin);
 	}
 }

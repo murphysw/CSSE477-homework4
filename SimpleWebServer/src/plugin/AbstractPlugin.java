@@ -1,36 +1,20 @@
-/*
- * AbstractPlugin.java
- * Nov 1, 2013
- *
- * Simple Web Server (SWS) for EE407/507 and CS455/555
- * 
- * Copyright (C) 2011 Chandan Raj Rupakheti, Clarkson University
- * 
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License 
- * as published by the Free Software Foundation, either 
- * version 3 of the License, or any later version.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.html>.
- * 
- * Contact Us:
- * Chandan Raj Rupakheti (rupakhcr@clarkson.edu)
- * Department of Electrical and Computer Engineering
- * Clarkson University
- * Potsdam
- * NY 13699-5722
- * http://clarkson.edu/~rupakhcr
- */
+
  
 package plugin;
 
-import java.io.File;
 
-import org.omg.CORBA.Request;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.HashMap;
+import java.util.Scanner;
+import java.util.StringTokenizer;
+import java.util.jar.Attributes;
 
 import protocol.HttpRequest;
 import protocol.HttpResponse;
@@ -38,16 +22,59 @@ import protocol.HttpResponse;
 
 /**
  * 
- * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
+ * @author Team Otherguys
  */
 abstract class AbstractPlugin implements PluginInterface {
+	
+	HashMap<String,ServletInterface> servlets;
+	
+	public AbstractPlugin(){
+		servlets = new HashMap<String,ServletInterface>();
+		File servletsFile = getConfigFile();
+		Scanner scan;
+		try{
+			scan = new Scanner(servletsFile);
+		}catch(FileNotFoundException ex){
+			System.out.println("This plugin has not defined a config file");
+			return;
+		}
+		while(scan.hasNext()){
+			String servletConfiguration = scan.nextLine();
+			StringTokenizer st = new StringTokenizer(servletConfiguration," ");
+			String requestType = st.nextToken();
+			String servletName = st.nextToken();
+			String servletPath = st.nextToken();
+			try{
+				File file = new File(servletPath); //This path will likely need to include .../plugins/<Plugin>/
+		        
+		        URI uri = file.toURI();
+		        URL url = new URL("jar:" + uri + "!/");
+		        URL[] urls = {url};
+		        URLClassLoader classLoader = new URLClassLoader(urls);
+		        JarURLConnection uc = (JarURLConnection)url.openConnection();
+		        String main = uc.getMainAttributes().getValue(Attributes.Name.MAIN_CLASS);
+		        if(main != null)
+		        {
+					Class<?> aClass = classLoader.loadClass(main);
+					ServletInterface servlet = (ServletInterface)aClass.newInstance();
+					servlets.put(servletName, servlet);
+		        }
+		        classLoader.close(); //This might remove the class, but it warns us if we don't have it
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		    } 
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see plugin.PluginInterface#getConfigFile()
 	 */
-	abstract public File getConfigFile();
+	public abstract File getConfigFile();
 
 	public void service(HttpRequest request, HttpResponse response){
-		
+		String uri = request.getUri();
+		String servletKey = uri.substring(uri.lastIndexOf('/'));
+		ServletInterface servlet = servlets.get(servletKey);
+		servlet.service(request,response);
 	}
 }

@@ -71,10 +71,10 @@ abstract class AbstractPlugin implements PluginInterface {
 	 */
 	public abstract File getConfigFile();
 
-	public void service(HttpRequest request, HttpResponse response){
+	public HttpResponse service(HttpRequest request){
 		String uri = request.getUri();
 		String servletKey = uri.substring(uri.lastIndexOf('/'));
 		AbstractServlet servlet = servlets.get(servletKey);
-		servlet.service(request,response);
+		return servlet.service(request);
 	}
 }

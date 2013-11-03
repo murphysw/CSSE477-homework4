@@ -1,3 +1,4 @@
-/gui
-/protocol
-/server
+gui/
+protocol/
+server/
+plugin/

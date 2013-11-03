@@ -33,8 +33,15 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
+import plugin.PluginInterface;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -49,30 +56,36 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.Attributes;
 
 /**
  * 
  * @author Spencer Murphy
  */
-public class PluginManager implements Runnable{
-	private final WatchService watcher;;
-    private final Map<WatchKey,Path> keys;
-	
-	public PluginManager(String path) throws IOException{
-		Path dir = Paths.get("plugins");
-		this.watcher = FileSystems.getDefault().newWatchService();
-        this.keys = new HashMap<WatchKey,Path>();
+public class PluginManager implements Runnable {
+	private final WatchService watcher;
+	private final Map<WatchKey, Path> keys;
+	private Map<String, PluginInterface> plugins;
 
-        System.out.format("Scanning %s ...\n", dir);
-        registerAll(dir);
-        System.out.println("Done.");
-        
+	public PluginManager(String path) throws IOException {
+		Path dir = Paths.get("plugins");
+		this.plugins = new HashMap<String, PluginInterface>();
+		this.watcher = FileSystems.getDefault().newWatchService();
+		this.keys = new HashMap<WatchKey, Path>();
+
+		registerAll(dir);
+		for (File file : dir.toFile().listFiles()){
+			if(file.toString().endsWith(".jar")){
+				loadJar(file.toString());
+			}
+		}
+
 	}
-	
-    @SuppressWarnings("unchecked")
-    static <T> WatchEvent<T> cast(WatchEvent<?> event) {
-        return (WatchEvent<T>)event;
-    }
+
+	@SuppressWarnings("unchecked")
+	static <T> WatchEvent<T> cast(WatchEvent<?> event) {
+		return (WatchEvent<T>) event;
+	}
 
 	/**
 	 * 
@@ -80,120 +93,124 @@ public class PluginManager implements Runnable{
 	public void watch() {
 		for (;;) {
 
-            // wait for key to be signalled
-            WatchKey key;
-            try {
-                key = watcher.take();
-            } catch (InterruptedException x) {
-                return;
-            }
+			// wait for key to be signalled
+			WatchKey key;
+			try {
+				key = watcher.take();
+			} catch (InterruptedException x) {
+				return;
+			}
 
-            Path dir = keys.get(key);
-            if (dir == null) {
-                System.err.println("WatchKey not recognized!!");
-                continue;
-            }
+			Path dir = keys.get(key);
+			if (dir == null) {
+				System.err.println("WatchKey not recognized!!");
+				continue;
+			}
 
-            for (WatchEvent<?> event: key.pollEvents()) {
-                WatchEvent.Kind kind = event.kind();
+			for (WatchEvent<?> event : key.pollEvents()) {
+				WatchEvent.Kind kind = event.kind();
 
-                // Context for directory entry event is the file name of entry
-                WatchEvent<Path> ev = cast(event);
-                Path name = ev.context();
-                Path child = dir.resolve(name);
+				// Context for directory entry event is the file name of entry
+				WatchEvent<Path> ev = cast(event);
+				Path name = ev.context();
+				Path child = dir.resolve(name);
 
-                // print out event
-                System.out.format("%s: %s\n", event.kind().name(), child);
+				// print out event
+				System.out.format("%s: %s\n", event.kind().name(), child);
 
-                // if directory is created, then
-                // register it and its sub-directories
-                if (kind == ENTRY_CREATE) {
-                    try {
-                        if (Files.isDirectory(child, NOFOLLOW_LINKS)) {
-                            registerAll(child);
-                        }
-                        System.out.println("added");
-                    } catch (IOException x) {
-                        // ignore to keep sample readbale
-                    }
-                }
-                else if (kind == ENTRY_MODIFY){
-                	try{
-                		if (Files.isDirectory(child,  NOFOLLOW_LINKS)) {
-                			registerAll(child);
-                		}
-                		System.out.println("modified");
-                	}
-                	catch (Exception e) {
-						// TODO: handle exception
+				if (kind == ENTRY_CREATE) {
+					if (child.toString().endsWith(".jar")){
+						loadJar(child.toString());
 					}
-                }
-                else if (kind == ENTRY_DELETE){
-                	try{
-                		if (Files.isDirectory(child,  NOFOLLOW_LINKS)) {
-                			//remove keys
-                			
-                		}
-                		System.out.println("deleted");
-                	}
-                	catch (Exception e) {
-						// TODO: handle exception
+					System.out.println("added");
+				} else if (kind == ENTRY_MODIFY) {
+					if (child.toString().endsWith(".jar")){
+						this.plugins.remove(child.toString());
+						loadJar(child.toString());
 					}
-                }
-            }
+					System.out.println("modified");
+				} else if (kind == ENTRY_DELETE) {
+					if (child.toString().endsWith(".jar")){
+						this.plugins.remove(child.toString());
+					}
+					System.out.println("deleted");
+				}
+			}
 
-            // reset key and remove from set if directory no longer accessible
-            boolean valid = key.reset();
-            if (!valid) {
-                keys.remove(key);
+			// reset key and remove from set if directory no longer accessible
+			boolean valid = key.reset();
+			if (!valid) {
+				keys.remove(key);
 
-                // all directories are inaccessible
-                if (keys.isEmpty()) {
-                    break;
-                }
-            }
-        }
-		
-		
-		
+				// all directories are inaccessible
+				if (keys.isEmpty()) {
+					break;
+				}
+			}
+		}
+
 	}
+
+	private void register(Path dir) throws IOException {
+		WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE,
+				ENTRY_MODIFY);
+		Path prev = keys.get(key);
+		if (prev == null) {
+			System.out.format("register: %s\n", dir);
+		} else {
+			if (!dir.equals(prev)) {
+				System.out.format("update: %s -> %s\n", prev, dir);
+			}
+		}
+		keys.put(key, dir);
+	}
+
+	/**
+	 * Register the given directory, and all its sub-directories, with the
+	 * WatchService.
+	 */
+	private void registerAll(final Path start) throws IOException {
+		// register directory and sub-directories
+		Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir,
+					BasicFileAttributes attrs) throws IOException {
+				register(dir);
+				return FileVisitResult.CONTINUE;
+			}
+		});
+	}
+
+	private void loadJar(String jarName) {
+		try{
+			File file = new File(jarName);
 	
-    private void register(Path dir) throws IOException {
-        WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-        Path prev = keys.get(key);
-        if (prev == null) {
-            System.out.format("register: %s\n", dir);
-        } else {
-            if (!dir.equals(prev)) {
-                System.out.format("update: %s -> %s\n", prev, dir);
-            }
-        }
-        keys.put(key, dir);
-    }
+			URI uri = file.toURI();
+			URL url = new URL("jar:" + uri + "!/");
+			URL[] urls = { url };
+			URLClassLoader classLoader = new URLClassLoader(urls);
+			JarURLConnection uc = (JarURLConnection) url.openConnection();
+			String main = uc.getMainAttributes().getValue(
+					Attributes.Name.MAIN_CLASS);
+			if (main != null) {
+				Class<?> aClass = classLoader.loadClass(main);
+				PluginInterface plugin = (PluginInterface) aClass.newInstance();
+				this.plugins.put(jarName, plugin);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
-    /**
-     * Register the given directory, and all its sub-directories, with the
-     * WatchService.
-     */
-    private void registerAll(final Path start) throws IOException {
-        // register directory and sub-directories
-        Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                throws IOException
-            {
-                register(dir);
-                return FileVisitResult.CONTINUE;
-            }
-        });
-    }
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
 		watch();
-		
+
 	}
 
 }

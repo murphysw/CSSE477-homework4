@@ -155,12 +155,8 @@ public class HttpResponseFactory {
 	 *            {@link Protocol#CLOSE}.
 	 * @return A {@link HttpResponse} object represent 404 status.
 	 */
-	public static HttpResponse create503ServiceUnavaliable(String connection) {
-		HttpResponse response = new HttpResponse(Protocol.VERSION,
-				Protocol.SERVICE_UNAVAILABLE, Protocol.TEMPORARY_OVERLOAD,
-				new HashMap<String, String>(), null);
-		fillGeneralHeader(response, connection);
-		return response;
+	public static HttpResponse create505ServiceUnavaliable(String connection) {
+			HttpResponse response = new HttpResponse(Protocol.VERSION, Protocol.)
 	}
 
 	/**

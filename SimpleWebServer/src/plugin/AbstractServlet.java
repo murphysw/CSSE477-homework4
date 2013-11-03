@@ -14,7 +14,7 @@ public abstract class AbstractServlet {
 	
 	public abstract void doPut(HttpRequest request, HttpResponse response);
 	
-	public void service(HttpRequest request, HttpResponse response) {
+	public HttpResponse service(HttpRequest request) {
 		String method = request.getMethod().toUpperCase();
 		if (method.equals("DELETE"))
 			doDelete(request, response);

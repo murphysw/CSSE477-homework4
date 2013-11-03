@@ -1,0 +1,64 @@
+/*
+ * QueuePlugins.java
+ * Nov 3, 2013
+ *
+ * Simple Web Server (SWS) for EE407/507 and CS455/555
+ * 
+ * Copyright (C) 2011 Chandan Raj Rupakheti, Clarkson University
+ * 
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License 
+ * as published by the Free Software Foundation, either 
+ * version 3 of the License, or any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.html>.
+ * 
+ * Contact Us:
+ * Chandan Raj Rupakheti (rupakhcr@clarkson.edu)
+ * Department of Electrical and Computer Engineering
+ * Clarkson University
+ * Potsdam
+ * NY 13699-5722
+ * http://clarkson.edu/~rupakhcr
+ */
+ 
+package plugin;
+
+import java.io.File;
+import java.util.PriorityQueue;
+
+import protocol.HttpResponse;
+
+/**
+ * 
+ * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
+ */
+public class QueuePlugins extends AbstractPlugin {
+
+	/* (non-Javadoc)
+	 * @see plugin.AbstractPlugin#getConfigFile()
+	 */
+	HttpResponse response = null;
+	// pulls the list of files from the plugins folder
+	public static PriorityQueue<File> getListOfPlugins() {
+		PriorityQueue<File> plugins = new PriorityQueue<File>();
+		final File directory = new File("plugins");
+		for (final File file : directory.listFiles()){
+			if (file.getName().endsWith(".jar")){
+				plugins.add(file);
+			}
+		}
+		
+		return plugins;
+	}
+	@Override
+	public File getConfigFile() {
+		
+		return getListOfPlugins().poll();
+	}
+
+}

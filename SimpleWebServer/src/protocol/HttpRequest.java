@@ -44,6 +44,7 @@ public class HttpRequest {
 	
 	private HttpRequest() {
 		this.header = new HashMap<String, String>();
+		this.body=" ";
 	}
 	
 	/**
@@ -156,10 +157,10 @@ public class HttpRequest {
 		}
 		
 		if(request.method.equals(Protocol.POST) || request.method.equals(Protocol.PUT)){
-			line = reader.readLine();
-			while(!line.equals("")) {
-				request.body += line+"\n";
-				line = reader.readLine();
+			int charCount = Integer.parseInt(request.header.get("content-length"));
+			for(int x=0;x<charCount;x++){
+				char bodyChar = (char) reader.read();
+				request.body+=bodyChar;
 			}
 		}
 		return request;

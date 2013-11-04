@@ -33,54 +33,6 @@ public abstract class AbstractPlugin implements PluginInterface {
 	
 	public AbstractPlugin(){
 		servlets = new HashMap<String,AbstractServlet>();
-//		File servletsFile = getConfigFile();
-//		Scanner scan;
-//		try{
-//			scan = new Scanner(servletsFile);
-//		}catch(FileNotFoundException ex){
-//			System.out.println("This plugin has not defined a config file");
-//			return;
-//		}
-//		while(scan.hasNext()){
-//			String servletConfiguration = scan.nextLine();
-//			StringTokenizer st = new StringTokenizer(servletConfiguration," ");
-//			String requestType = st.nextToken();
-//			String servletName = st.nextToken();
-//			String servletClass = st.nextToken();
-//			/*try{
-//				File file = new File(servletPath); //This path will likely need to include .../plugins/<Plugin>/
-//		        
-//		        URI uri = file.toURI();
-//		        URL url = new URL("jar:" + uri + "!/");
-//		        URL[] urls = {url};
-//		        URLClassLoader classLoader = new URLClassLoader(urls);
-//		        JarURLConnection uc = (JarURLConnection)url.openConnection();
-//		        String main = uc.getMainAttributes().getValue(Attributes.Name.MAIN_CLASS);
-//		        if(main != null)
-//		        {
-//					Class<?> aClass = classLoader.loadClass(main);
-//					AbstractServlet servlet = (AbstractServlet)aClass.newInstance();
-//					servlets.put(servletName, servlet);
-//		        }
-//		        classLoader.close(); //This might remove the class, but it warns us if we don't have it
-//		    } catch (Exception e) {
-//		        e.printStackTrace();
-//		    } */
-//			try {
-//				Class sClass = Class.forName(servletClass);
-//				AbstractServlet servlet = (AbstractServlet) sClass.newInstance();
-//				servlets.put(servletName, servlet);
-//			} catch (InstantiationException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} catch (IllegalAccessException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} catch (ClassNotFoundException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
 	}
 
 	/* (non-Javadoc)

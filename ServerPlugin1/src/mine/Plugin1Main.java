@@ -6,6 +6,7 @@ import java.net.URLClassLoader;
 import plugin.AbstractPlugin;
 import protocol.HttpRequest;
 import protocol.HttpResponse;
+import sun.print.resources.serviceui;
 
 
 public class Plugin1Main extends AbstractPlugin {
@@ -22,6 +23,14 @@ public class Plugin1Main extends AbstractPlugin {
 	@Override
 	public String getConfigFile() {
 		return "Plugin1ServletConfigFile.txt";
+	}
+	
+	@Override
+	public HttpResponse service(HttpRequest request) {
+		// TODO Auto-generated method stub
+		HttpResponse response = super.service(request);
+		response.put("Plugin:","Plugin1");
+		return response;
 	}
 
 }

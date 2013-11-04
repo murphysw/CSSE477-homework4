@@ -97,15 +97,13 @@ public class ConnectionHandler implements Runnable {
 			this.server.incrementServiceTime(end-start);
 			return;
 		}
-		System.out.println("hi");
 		// At this point we have the input and output stream of the socket
 		// Now lets create a HttpRequest object
 		HttpRequest request = null;
 		HttpResponse response = null;
 		try {
 			request = HttpRequest.read(inStream);
-			System.out.println("done");
-//			System.out.println(request);
+			System.out.println(request);
 		}
 		catch(ProtocolException pe) {
 			// We have some sort of protocol exception. Get its status code and create response
@@ -130,7 +128,6 @@ public class ConnectionHandler implements Runnable {
 			// Means there was an error, now write the response object to the socket
 			try {
 				response.write(outStream);
-//				System.out.println(response);
 			}
 			catch(Exception e){
 				// We will ignore this exception
@@ -157,11 +154,8 @@ public class ConnectionHandler implements Runnable {
 				response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
 			}
 			else{
-				System.out.println("Made it to the plugin check");
 				boolean plugin = checkForPlugin(request);
-				System.out.println(plugin);
 				if(plugin){
-					System.out.println(request.toString());
 					response = handlePluginRequest(request);
 					response = validator.checkResponse(response);
 				}
@@ -323,7 +317,6 @@ public class ConnectionHandler implements Runnable {
 		try{
 			// Write response and we are all done so close the socket
 			response.write(outStream);
-//			System.out.println(response);
 			socket.close();
 		}
 		catch(Exception e){
@@ -348,7 +341,6 @@ public class ConnectionHandler implements Runnable {
 		String pluginName;
 		try{
 			 pluginName = request.getUri().split("/")[1];
-			System.out.println(pluginName);
 			
 		}
 		catch (IndexOutOfBoundsException e){
@@ -372,9 +364,6 @@ public class ConnectionHandler implements Runnable {
 		catch (IndexOutOfBoundsException e){
 			return false;
 		}
-		
-		System.out.println("uri: " + request.getUri());
-		System.out.println("plugin: " + plugin);
 		return manager.checkForPlugin(plugin);
 	}
 }

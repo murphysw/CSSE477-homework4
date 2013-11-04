@@ -47,6 +47,9 @@ public class Protocol {
 	public static final int OK_CODE = 200;
 	public static final String OK_TEXT = "OK";
 
+	public static final int CREATED_CODE = 201;
+	public static final String CREATED_TEXT = "New File Created from PUT Request";
+
 	public static final int MOVED_PERMANENTLY_CODE = 301;
 	public static final String MOVED_PERMANENTLY_TEXT = "Moved Permanently";
 
@@ -58,15 +61,15 @@ public class Protocol {
 
     public static final int METHOD_NOT_ALLOWED = 405;
     public static final String METHOD_NOT_ALLOWED_TEXT = "Method not allowed";
+    
+	public static final int INTERNAL_SERVER_ERROR = 500;
+	public static final String INTERNAL_SERVER_ERROR_TEXT = "Internal Server Error";
 
 	public static final int SERVICE_UNAVAILABLE = 503;
 	public static final String TEMPORARY_OVERLOAD = "Server is temporarily overloaded or under maintenance";
 
 	public static final int NOT_SUPPORTED_CODE = 505;
 	public static final String NOT_SUPPORTED_TEXT = "HTTP Version Not Supported";
-
-	public static final int CREATED_CODE = 201;
-	public static final String CREATED_TEXT = "New File Created from PUT Request";
 
 	// Some useful header elements in request
 	public static final String HOST = "Host";

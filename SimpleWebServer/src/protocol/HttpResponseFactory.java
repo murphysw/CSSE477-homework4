@@ -165,6 +165,15 @@ public class HttpResponseFactory {
 		return response;	
 	}
 
+	public static HttpResponse create500InternalServerError(String connection) {
+		HttpResponse response = new HttpResponse(Protocol.VERSION,
+				Protocol.INTERNAL_SERVER_ERROR, Protocol.INTERNAL_SERVER_ERROR_TEXT,
+				new HashMap<String, String>(), null);
+		fillGeneralHeader(response, connection);
+		return response;
+	}
+	
+	
 	/**
 	 * Creates a {@link HttpResponse} object for server being unable to handle
 	 * the request due to a temporary overload

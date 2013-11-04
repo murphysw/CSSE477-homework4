@@ -3,12 +3,12 @@
  * Nov 1, 2013
  *
  * Simple Web Server (SWS) for EE407/507 and CS455/555
- * 
+ *
  * Copyright (C) 2011 Chandan Raj Rupakheti, Clarkson University
- * 
+ *
  * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License 
- * as published by the Free Software Foundation, either 
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation, either
  * version 3 of the License, or any later version.
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,7 +16,7 @@
  * GNU Lesser General Public License for more details.
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.html>.
- * 
+ *
  * Contact Us:
  * Chandan Raj Rupakheti (rupakhcr@clarkson.edu)
  * Department of Electrical and Computer Engineering
@@ -37,10 +37,7 @@ import plugin.PluginInterface;
 
 import java.io.File;
 import java.io.IOException;
-<<<<<<< HEAD
-=======
 import java.io.InputStream;
->>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -61,13 +58,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
-<<<<<<< HEAD
-=======
 import java.util.zip.ZipEntry;
->>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
+
 
 /**
- * 
+ *
  * @author Spencer Murphy
  */
 public class PluginManager implements Runnable {
@@ -96,7 +91,7 @@ public class PluginManager implements Runnable {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void watch() {
 		for (;;) {
@@ -192,7 +187,7 @@ public class PluginManager implements Runnable {
 	private void loadJar(String jarName) {
 		try{
 			File file = new File(jarName);
-	
+
 			URI uri = file.toURI();
 			URL url = new URL("jar:" + uri + "!/");
 			URL[] urls = { url };
@@ -202,17 +197,12 @@ public class PluginManager implements Runnable {
 					Attributes.Name.MAIN_CLASS);
 			if (main != null) {
 				Class<?> aClass = classLoader.loadClass(main);
-<<<<<<< HEAD
 				PluginInterface plugin = (PluginInterface) aClass.newInstance();
-=======
-				
-				
 				PluginInterface plugin = (PluginInterface) aClass.newInstance();
 				ZipEntry entry = uc.getJarFile().getEntry(plugin.getConfigFile());
 				System.out.println(entry.getName());
 				InputStream stream = uc.getJarFile().getInputStream(entry);
 				plugin.setUpHash(stream);
->>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 				this.plugins.put(jarName, plugin);
 			}
 		} catch (Exception e) {
@@ -223,16 +213,14 @@ public class PluginManager implements Runnable {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
 		watch();
 
-<<<<<<< HEAD
-=======
 	}
-	
+
 	public Map<String, PluginInterface> getPlugins(){
 		return this.plugins;
 	}
@@ -246,7 +234,7 @@ public class PluginManager implements Runnable {
 			return true;
 		}
 		return false;
->>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
+
 	}
 
 }

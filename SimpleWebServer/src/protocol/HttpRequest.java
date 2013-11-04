@@ -156,19 +156,18 @@ public class HttpRequest {
 		}
 		
 		line = reader.readLine();
-		String body = "";
+		StringBuilder body = new StringBuilder();
 		if (line == null){
 			return request;
 		}else{
 			line = line.trim();
-			while(!line.equals("")){
-				body += line.trim();
-				body += '\n';
-				
-				line = reader.readLine().trim();
+			System.out.println(line);
+			while(line != null){
+				body.append(line + "\n");
+				line = reader.readLine();
 			}
 			if(body.length()!=0){
-				request.body = body.substring(0, body.length()-1);
+				request.body = body.toString();
 			}
 			return request;
 		}

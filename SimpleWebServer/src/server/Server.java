@@ -47,6 +47,7 @@ public class Server implements Runnable {
 	
 	private WebServer window;
 	private PluginManager manager;
+	private AuditLog auditLog;
 	/**
 	 * @param rootDirectory
 	 * @param port
@@ -58,6 +59,7 @@ public class Server implements Runnable {
 		this.connections = 0;
 		this.serviceTime = 0;
 		this.window = window;
+		this.auditLog = new AuditLog(rootDirectory);
 		try {
 			this.manager = new PluginManager(rootDirectory);
 			new Thread(manager).start();
@@ -141,7 +143,7 @@ public class Server implements Runnable {
 				
 				// Create a handler for this incoming connection and start the handler in a new thread
 				
-				ConnectionHandler handler = new ConnectionHandler(this, connectionSocket, manager);
+				ConnectionHandler handler = new ConnectionHandler(this, connectionSocket, manager, auditLog);
 				
 				new Thread(handler).start();
 			}

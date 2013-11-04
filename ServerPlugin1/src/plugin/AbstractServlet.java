@@ -2,17 +2,29 @@ package plugin;
 
 import protocol.HttpRequest;
 import protocol.HttpResponse;
+import protocol.HttpResponseFactory;
+import protocol.Protocol;
 
 
 public abstract class AbstractServlet {
 	
-	public abstract HttpResponse doDelete(HttpRequest request);
+	public abstract String getSupportedRequests();
 	
-	public abstract HttpResponse doGet(HttpRequest request);	
+	public HttpResponse doDelete(HttpRequest request) {
+		return HttpResponseFactory.create405MethodNotAllowed(getSupportedRequests() ,Protocol.CLOSE);
+	}
 	
-	public abstract HttpResponse doPost(HttpRequest request);
+	public HttpResponse doGet(HttpRequest request){
+		return HttpResponseFactory.create405MethodNotAllowed(getSupportedRequests() ,Protocol.CLOSE);
+	}	
 	
-	public abstract HttpResponse doPut(HttpRequest request);
+	public HttpResponse doPost(HttpRequest request){
+		return HttpResponseFactory.create405MethodNotAllowed(getSupportedRequests() ,Protocol.CLOSE);
+	}
+	
+	public HttpResponse doPut(HttpRequest request){
+		return HttpResponseFactory.create405MethodNotAllowed(getSupportedRequests() ,Protocol.CLOSE);
+	}
 	
 	public HttpResponse service(HttpRequest request) {
 		String method = request.getMethod().toUpperCase();

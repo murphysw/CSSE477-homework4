@@ -50,12 +50,14 @@ public class ConnectionHandler implements Runnable {
 	private Socket socket;
 	private PluginManager manager;
 	private HttpResponseValidator validator;
+	private AuditLog auditLog;
 	
-	public ConnectionHandler(Server server, Socket socket, PluginManager manager) {
+	public ConnectionHandler(Server server, Socket socket, PluginManager manager, AuditLog log) {
 		this.server = server;
 		this.socket = socket;
 		this.manager = manager;
 		this.validator = new HttpResponseValidator();
+		this.auditLog = log;
 	}
 	
 	/**
@@ -126,6 +128,7 @@ public class ConnectionHandler implements Runnable {
 		}
 		
 		// Finally
+		auditLog.newRecord(socket, request, response);
 		endRequest(response, start, outStream);
 	}
 	

@@ -37,6 +37,10 @@ import plugin.PluginInterface;
 
 import java.io.File;
 import java.io.IOException;
+<<<<<<< HEAD
+=======
+import java.io.InputStream;
+>>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -57,6 +61,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
+<<<<<<< HEAD
+=======
+import java.util.zip.ZipEntry;
+>>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 
 /**
  * 
@@ -194,7 +202,17 @@ public class PluginManager implements Runnable {
 					Attributes.Name.MAIN_CLASS);
 			if (main != null) {
 				Class<?> aClass = classLoader.loadClass(main);
+<<<<<<< HEAD
 				PluginInterface plugin = (PluginInterface) aClass.newInstance();
+=======
+				
+				
+				PluginInterface plugin = (PluginInterface) aClass.newInstance();
+				ZipEntry entry = uc.getJarFile().getEntry(plugin.getConfigFile());
+				System.out.println(entry.getName());
+				InputStream stream = uc.getJarFile().getInputStream(entry);
+				plugin.setUpHash(stream);
+>>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 				this.plugins.put(jarName, plugin);
 			}
 		} catch (Exception e) {
@@ -211,6 +229,24 @@ public class PluginManager implements Runnable {
 	public void run() {
 		watch();
 
+<<<<<<< HEAD
+=======
+	}
+	
+	public Map<String, PluginInterface> getPlugins(){
+		return this.plugins;
+	}
+
+	/**
+	 * @param plugin
+	 * @return
+	 */
+	public boolean checkForPlugin(String plugin) {
+		if (plugins.containsKey(plugin)){
+			return true;
+		}
+		return false;
+>>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 	}
 
 }

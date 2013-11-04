@@ -29,6 +29,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Map;
 
+import plugin.PluginInterface;
+import plugin.PluginManager;
 import protocol.HttpRequest;
 import protocol.HttpResponse;
 import protocol.HttpResponseFactory;
@@ -46,11 +48,18 @@ import protocol.ProtocolException;
 public class ConnectionHandler implements Runnable {
 	private Server server;
 	private Socket socket;
+<<<<<<< HEAD
 	private ArrayList<String> methodList;
 
 	public ConnectionHandler(Server server, Socket socket) {
+=======
+	private PluginManager manager;
+	
+	public ConnectionHandler(Server server, Socket socket, PluginManager manager) {
+>>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 		this.server = server;
 		this.socket = socket;
+		this.manager = manager;
 	}
 
 	/**
@@ -147,6 +156,7 @@ public class ConnectionHandler implements Runnable {
 				// DONE: Fill in the rest of the code here
 				response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
 			}
+<<<<<<< HEAD
 			else if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
 //				Map<String, String> header = request.getHeader();
 //				String date = header.get("if-modified-since");
@@ -176,6 +186,17 @@ public class ConnectionHandler implements Runnable {
 				}
 					}}}
 				else 
+=======
+			else{
+				System.out.println("Made it to the plugin check");
+				boolean plugin = checkForPlugin(request);
+				System.out.println(plugin);
+				if(plugin){
+					System.out.println(request.toString());
+					response = handlePluginRequest(request);
+				}
+				else {
+>>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 					if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
 		//				Map<String, String> header = request.getHeader();
 		//				String date = header.get("if-modified-since");
@@ -255,6 +276,7 @@ public class ConnectionHandler implements Runnable {
 							response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 						}
 					}
+<<<<<<< HEAD
 				else {
 					// File does not exist so lets create 404 file not found code
 					response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
@@ -278,6 +300,8 @@ public class ConnectionHandler implements Runnable {
 						String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
 						file = new File(location);
 					}
+=======
+>>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 					else if(request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
 						// Get relative uri path from Request
 						String uri = request.getUri();
@@ -287,7 +311,10 @@ public class ConnectionHandler implements Runnable {
 						File file = new File(rootDirectory + uri);
 						
 						// Check if file exists
+<<<<<<< HEAD
 
+=======
+>>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 						if(file.exists()) {
 							// Lets create 200 OK response
 							response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
@@ -340,6 +367,7 @@ public class ConnectionHandler implements Runnable {
 						response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 					}
 				}
+<<<<<<< HEAD
 				else {
 					// File does not exist so lets create 404 file not found code
 					response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
@@ -412,6 +440,8 @@ public class ConnectionHandler implements Runnable {
 			else {
 				// File does not exist so lets create 404 file not found code
 				response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+=======
+>>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 			}
 			}
 					}
@@ -447,6 +477,7 @@ public class ConnectionHandler implements Runnable {
 		this.server.incrementServiceTime(end-start);
 	}
 
+<<<<<<< HEAD
 	private void addMethod(String method) {
 		this.methodList.add(method);
 	}
@@ -465,13 +496,31 @@ public class ConnectionHandler implements Runnable {
 		return false;
 	}
 
+=======
+>>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 	/**
 	 * @param request
 	 * @return
 	 */
 	private HttpResponse handlePluginRequest(HttpRequest request) {
+<<<<<<< HEAD
 		// TODO Auto-generated method stub
 		return null;
+=======
+		String pluginName;
+		try{
+			 pluginName = request.getUri().split("/")[1];
+			System.out.println(pluginName);
+			
+		}
+		catch (IndexOutOfBoundsException e){
+			return HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+		}
+	
+		PluginInterface plugin = manager.getPlugins().get(pluginName);
+		plugin.toString();
+		return plugin.service(request);
+>>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 	}
 
 	/**
@@ -479,6 +528,7 @@ public class ConnectionHandler implements Runnable {
 	 * @return
 	 */
 	private boolean checkForPlugin(HttpRequest request) {
+<<<<<<< HEAD
 		try {
 			String plugin = request.getUri().split("/")[0];
 			String relativeURI = request.getUri().split("/")[1];
@@ -486,5 +536,18 @@ public class ConnectionHandler implements Runnable {
 			return false;
 		}
 		return false;
+=======
+		String plugin;
+		try{
+		plugin = request.getUri().split("/")[1];
+		}
+		catch (IndexOutOfBoundsException e){
+			return false;
+		}
+		
+		System.out.println("uri: " + request.getUri());
+		System.out.println("plugin: " + plugin);
+		return manager.checkForPlugin(plugin);
+>>>>>>> 79493b7ec9d298e093ba1796585cb0fdd5c76994
 	}
 }

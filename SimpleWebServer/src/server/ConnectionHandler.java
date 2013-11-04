@@ -151,8 +151,11 @@ public class ConnectionHandler implements Runnable {
 				response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
 			}
 			else{
+				System.out.println("Made it to the plugin check");
 				boolean plugin = checkForPlugin(request);
+				System.out.println(plugin);
 				if(plugin){
+					System.out.println(request.toString());
 					response = handlePluginRequest(request);
 				}
 				else {
@@ -333,9 +336,18 @@ public class ConnectionHandler implements Runnable {
 	 * @return
 	 */
 	private HttpResponse handlePluginRequest(HttpRequest request) {
-		String pluginName = request.getUri().split("/")[0];
-		
+		String pluginName;
+		try{
+			 pluginName = request.getUri().split("/")[1];
+			System.out.println(pluginName);
+			
+		}
+		catch (IndexOutOfBoundsException e){
+			return HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+		}
+	
 		PluginInterface plugin = manager.getPlugins().get(pluginName);
+		plugin.toString();
 		return plugin.service(request);
 	}
 
@@ -344,7 +356,16 @@ public class ConnectionHandler implements Runnable {
 	 * @return
 	 */
 	private boolean checkForPlugin(HttpRequest request) {
-		String plugin = request.getUri().split("/")[0];
+		String plugin;
+		try{
+		plugin = request.getUri().split("/")[1];
+		}
+		catch (IndexOutOfBoundsException e){
+			return false;
+		}
+		
+		System.out.println("uri: " + request.getUri());
+		System.out.println("plugin: " + plugin);
 		return manager.checkForPlugin(plugin);
 	}
 }

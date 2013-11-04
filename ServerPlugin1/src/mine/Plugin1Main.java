@@ -1,5 +1,6 @@
 package mine;
 import java.io.File;
+import java.io.InputStream;
 
 import plugin.AbstractPlugin;
 import protocol.HttpRequest;
@@ -18,8 +19,8 @@ public class Plugin1Main extends AbstractPlugin {
 	}
 
 	@Override
-	public File getConfigFile() {
-		return new File(configFile);
+	public String getConfigFile() {
+		return "Plugin1ServletConfigFile.txt";
 	}
 
 }

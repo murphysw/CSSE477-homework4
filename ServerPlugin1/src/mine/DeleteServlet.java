@@ -20,9 +20,8 @@ public class DeleteServlet extends AbstractServlet {
 	@Override
 	public HttpResponse doDelete(HttpRequest request) {
 		HttpResponse response = null;
-		String uri = request.getUri();
-		String cwd = System.getProperty("user.dir");
-		File file = new File(cwd + uri);
+		String complete = "C:\\Users\\hoorncj\\Documents\\Courses\\CSSE477\\HW4\\CSSE477-homework4\\ServerPlugin1\\src\\mine\\1.html";
+		File file = new File(complete);
 		if(file.exists()) {
 			// Its a file
 			//delete the file

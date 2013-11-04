@@ -59,7 +59,7 @@ public class Server implements Runnable {
 		this.connections = 0;
 		this.serviceTime = 0;
 		this.window = window;
-		this.auditLog = new AuditLog(rootDirectory);
+		this.auditLog = new AuditLog(rootDirectory,10);
 		try {
 			this.manager = new PluginManager(rootDirectory);
 			new Thread(manager).start();
@@ -136,6 +136,11 @@ public class Server implements Runnable {
 				// Listen for incoming socket connection
 				// This method block until somebody makes a request
 				Socket connectionSocket = this.welcomeSocket.accept();
+				
+				if(this.connections > 100){
+					System.out.println("Stopped temporarily");
+					continue;
+				}
 				
 				System.out.println(this.connections);
 				

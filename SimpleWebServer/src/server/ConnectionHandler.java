@@ -33,6 +33,7 @@ import plugin.PluginManager;
 import protocol.HttpRequest;
 import protocol.HttpResponse;
 import protocol.HttpResponseFactory;
+import protocol.HttpResponseValidator;
 import protocol.Protocol;
 import protocol.ProtocolException;
 
@@ -48,11 +49,15 @@ public class ConnectionHandler implements Runnable {
 	private Server server;
 	private Socket socket;
 	private PluginManager manager;
+	private AuditLog auditLog;
+	private HttpResponseValidator validator;
 	
 	public ConnectionHandler(Server server, Socket socket, PluginManager manager, AuditLog log) {
 		this.server = server;
 		this.socket = socket;
 		this.manager = manager;
+		this.auditLog = log;
+		this.validator = new HttpResponseValidator();
 	}
 	
 	/**
@@ -158,6 +163,7 @@ public class ConnectionHandler implements Runnable {
 				if(plugin){
 					System.out.println(request.toString());
 					response = handlePluginRequest(request);
+					response = validator.checkResponse(response);
 				}
 				else {
 					if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
@@ -330,6 +336,8 @@ public class ConnectionHandler implements Runnable {
 		// Get the end time
 		long end = System.currentTimeMillis();
 		this.server.incrementServiceTime(end-start);
+		server.incrementConnections(-1);
+		auditLog.newRecord(socket, request, response);
 	}
 
 	/**

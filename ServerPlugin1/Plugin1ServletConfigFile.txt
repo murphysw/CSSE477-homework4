@@ -1,6 +1,5 @@
 BadServlet mine.BadServlet
 DeleteServlet mine.DeleteServlet
 GetServlet mine.GetServlet
-MultiServlet mine.MultiServlet
 PostServlet mine.PostServlet
 PutServlet mine.PutServlet

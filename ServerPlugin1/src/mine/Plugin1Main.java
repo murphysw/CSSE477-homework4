@@ -1,6 +1,7 @@
 package mine;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URLClassLoader;
 
 import plugin.AbstractPlugin;
 import protocol.HttpRequest;

@@ -32,7 +32,7 @@ public abstract class AbstractPlugin implements PluginInterface {
 	HashMap<String,AbstractServlet> servlets;
 	
 	public AbstractPlugin(){
-//		servlets = new HashMap<String,AbstractServlet>();
+		servlets = new HashMap<String,AbstractServlet>();
 //		File servletsFile = getConfigFile();
 //		Scanner scan;
 //		try{
@@ -90,39 +90,43 @@ public abstract class AbstractPlugin implements PluginInterface {
 
 	public HttpResponse service(HttpRequest request){
 		String uri = request.getUri();
-		String servletKey = uri.substring(uri.lastIndexOf('/'));
+		String servletKey = uri.substring(uri.lastIndexOf('/')+1);
 		AbstractServlet servlet = servlets.get(servletKey);
 		return servlet.service(request);
 	}
 	
-	public void setUpHash(InputStream stream){
+	public void setUpHash(URLClassLoader classLoader, InputStream stream){
 		InputStreamReader inStreamReader = new InputStreamReader(stream);
 		BufferedReader reader = new BufferedReader(inStreamReader);
 		
 		//First Request Line: GET /somedir/page.html HTTP/1.1
 		try {
 			String line = reader.readLine();
-			StringTokenizer st = new StringTokenizer(line," ");
-			String servletName = st.nextToken();
-			String servletClass = st.nextToken();
-			try {
-				Class sClass = Class.forName(servletClass);
-				AbstractServlet servlet = (AbstractServlet) sClass.newInstance();
-				servlets.put(servletName, servlet);
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			while(line != null){
+				StringTokenizer st = new StringTokenizer(line," ");
+				String servletName = st.nextToken();
+				String servletClass = st.nextToken();
+				Class aClass = classLoader.loadClass(servletClass);
+				try {
+					AbstractServlet servlet = (AbstractServlet) aClass.newInstance();
+					servlets.put(servletName, servlet);
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				line = reader.readLine();
 			}
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} // A line ends with either a \r, or a \n, or both
+		catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		} // A line ends with either a \r, or a \n, or both
 		
 	}

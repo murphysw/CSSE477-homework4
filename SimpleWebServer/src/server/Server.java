@@ -137,6 +137,8 @@ public class Server implements Runnable {
 				// This method block until somebody makes a request
 				Socket connectionSocket = this.welcomeSocket.accept();
 				
+				System.out.println(this.connections);
+				
 				// Come out of the loop if the stop flag is set
 				if(this.stop)
 					break;

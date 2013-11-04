@@ -155,22 +155,14 @@ public class HttpRequest {
 			line = reader.readLine().trim();
 		}
 		
-		line = reader.readLine();
-		StringBuilder body = new StringBuilder();
-		if (line == null){
-			return request;
-		}else{
-			line = line.trim();
-			System.out.println(line);
-			while(line != null){
-				body.append(line + "\n");
+		if(request.method.equals(Protocol.POST) || request.method.equals(Protocol.PUT)){
+			line = reader.readLine();
+			while(!line.equals("")) {
+				request.body += line+"\n";
 				line = reader.readLine();
 			}
-			if(body.length()!=0){
-				request.body = body.toString();
-			}
-			return request;
 		}
+		return request;
 	}
 	
 	

@@ -4,6 +4,7 @@ package plugin;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URLClassLoader;
 
 import protocol.HttpRequest;
 import protocol.HttpResponse;
@@ -21,5 +22,5 @@ public interface PluginInterface {
 	/**
 	 * @param stream
 	 */
-	public abstract void setUpHash(InputStream stream);
+	public abstract void setUpHash(URLClassLoader classLoader, InputStream stream);
 }

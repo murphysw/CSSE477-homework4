@@ -49,7 +49,7 @@ public class ConnectionHandler implements Runnable {
 	private Socket socket;
 	private PluginManager manager;
 	
-	public ConnectionHandler(Server server, Socket socket, PluginManager manager) {
+	public ConnectionHandler(Server server, Socket socket, PluginManager manager, AuditLog log) {
 		this.server = server;
 		this.socket = socket;
 		this.manager = manager;
@@ -92,13 +92,14 @@ public class ConnectionHandler implements Runnable {
 			this.server.incrementServiceTime(end-start);
 			return;
 		}
-		
+		System.out.println("hi");
 		// At this point we have the input and output stream of the socket
 		// Now lets create a HttpRequest object
 		HttpRequest request = null;
 		HttpResponse response = null;
 		try {
 			request = HttpRequest.read(inStream);
+			System.out.println("done");
 //			System.out.println(request);
 		}
 		catch(ProtocolException pe) {

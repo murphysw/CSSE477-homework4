@@ -56,6 +56,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
 import java.util.zip.ZipEntry;
@@ -184,32 +185,42 @@ public class PluginManager implements Runnable {
 	}
 
 	private void loadJar(String jarName) {
-		try{
-			File file = new File(jarName);
-	
-			URI uri = file.toURI();
-			URL url = new URL("jar:" + uri + "!/");
-			URL[] urls = { url };
-			URLClassLoader classLoader = new URLClassLoader(urls);
-			JarURLConnection uc = (JarURLConnection) url.openConnection();
-			String main = uc.getMainAttributes().getValue(
-					Attributes.Name.MAIN_CLASS);
-			if (main != null) {
-				Class<?> aClass = classLoader.loadClass(main);
-				
-				
-				PluginInterface plugin = (PluginInterface) aClass.newInstance();
-				ZipEntry entry = uc.getJarFile().getEntry(plugin.getConfigFile());
-				System.out.println(entry.getName());
-				InputStream stream = uc.getJarFile().getInputStream(entry);
-				plugin.setUpHash(stream);
-				this.plugins.put(jarName, plugin);
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        try{
+               File file = new File(jarName);
+ 
+               URI uri = file.toURI();
+               URL url = new URL("jar:" + uri + "!/");
+               URL[] urls = { url };
+               URLClassLoader classLoader = new URLClassLoader(urls);
+               JarURLConnection uc = (JarURLConnection) url.openConnection();
+               String main = uc.getMainAttributes().getValue(
+                            Attributes.Name.MAIN_CLASS);
+               if (main != null) {
+                     Class<?> aClass = classLoader.loadClass(main);
+                     
+                     
+                     PluginInterface plugin = (PluginInterface) aClass.newInstance();
+                     ZipEntry entry = uc.getJarFile().getEntry(plugin.getConfigFile());
+                     System.out.println(entry.getName());
+                     InputStream stream = uc.getJarFile().getInputStream(entry);
+                     
+                     plugin.setUpHash(classLoader, stream);
+                     StringTokenizer st = new StringTokenizer(jarName, "\\");
+                     String tempName = "";
+                     while (st.hasMoreElements())
+                            tempName = st.nextToken();
+                     tempName = tempName.substring(0 , tempName.length()-4);
+                      
+                     
+                     this.plugins.put(tempName, plugin);
+                     System.out.println(plugins.size());
+               }
+        } catch (Exception e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+        }
 	}
+
 
 	/*
 	 * (non-Javadoc)

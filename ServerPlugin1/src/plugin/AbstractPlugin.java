@@ -95,7 +95,7 @@ public abstract class AbstractPlugin implements PluginInterface {
 		return servlet.service(request);
 	}
 	
-	public void setUpHash(InputStream stream){
+	public void setUpHash(URLClassLoader classLoader, InputStream stream){
 		InputStreamReader inStreamReader = new InputStreamReader(stream);
 		BufferedReader reader = new BufferedReader(inStreamReader);
 		
@@ -105,17 +105,14 @@ public abstract class AbstractPlugin implements PluginInterface {
 			StringTokenizer st = new StringTokenizer(line," ");
 			String servletName = st.nextToken();
 			String servletClass = st.nextToken();
+			Class aClass = classLoader.loadClass(servletClass);
 			try {
-				Class sClass = Class.forName(servletClass);
-				AbstractServlet servlet = (AbstractServlet) sClass.newInstance();
+				AbstractServlet servlet = (AbstractServlet) aClass.newInstance();
 				servlets.put(servletName, servlet);
 			} catch (InstantiationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -124,6 +121,10 @@ public abstract class AbstractPlugin implements PluginInterface {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} // A line ends with either a \r, or a \n, or both
+		catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 	}
 }

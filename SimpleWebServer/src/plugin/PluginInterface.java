@@ -3,6 +3,7 @@
 package plugin;
 
 import java.io.File;
+import java.io.InputStream;
 
 import protocol.HttpRequest;
 import protocol.HttpResponse;
@@ -13,7 +14,12 @@ import protocol.HttpResponse;
  */
 public interface PluginInterface {
 	
-	public abstract File getConfigFile();
+	public abstract String getConfigFile();
 	
 	public abstract HttpResponse service(HttpRequest request);
+
+	/**
+	 * @param stream
+	 */
+	public abstract void setUpHash(InputStream stream);
 }

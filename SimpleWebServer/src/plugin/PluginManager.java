@@ -37,6 +37,7 @@ import plugin.PluginInterface;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -57,6 +58,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
+import java.util.zip.ZipEntry;
 
 /**
  * 
@@ -194,7 +196,13 @@ public class PluginManager implements Runnable {
 					Attributes.Name.MAIN_CLASS);
 			if (main != null) {
 				Class<?> aClass = classLoader.loadClass(main);
+				
+				
 				PluginInterface plugin = (PluginInterface) aClass.newInstance();
+				ZipEntry entry = uc.getJarFile().getEntry(plugin.getConfigFile());
+				System.out.println(entry.getName());
+				InputStream stream = uc.getJarFile().getInputStream(entry);
+				plugin.setUpHash(stream);
 				this.plugins.put(jarName, plugin);
 			}
 		} catch (Exception e) {

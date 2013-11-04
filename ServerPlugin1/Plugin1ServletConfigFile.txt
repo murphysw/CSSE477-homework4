@@ -1,1 +1,1 @@
-GET OnlyServlet	MultiServlet
+OnlyServlet Plugin1Servlet1

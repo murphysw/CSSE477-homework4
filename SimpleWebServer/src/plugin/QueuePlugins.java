@@ -56,9 +56,9 @@ public class QueuePlugins extends AbstractPlugin {
 		return plugins;
 	}
 	@Override
-	public File getConfigFile() {
-		
-		return getListOfPlugins().poll();
+	public String getConfigFile() {
+		return "";
+//		return getListOfPlugins().poll();
 	}
 
 }

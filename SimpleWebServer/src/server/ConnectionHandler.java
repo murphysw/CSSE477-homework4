@@ -28,6 +28,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Map;
 
+import plugin.PluginInterface;
+import plugin.PluginManager;
 import protocol.HttpRequest;
 import protocol.HttpResponse;
 import protocol.HttpResponseFactory;
@@ -45,10 +47,12 @@ import protocol.ProtocolException;
 public class ConnectionHandler implements Runnable {
 	private Server server;
 	private Socket socket;
+	private PluginManager manager;
 	
-	public ConnectionHandler(Server server, Socket socket) {
+	public ConnectionHandler(Server server, Socket socket, PluginManager manager) {
 		this.server = server;
 		this.socket = socket;
+		this.manager = manager;
 	}
 	
 	/**
@@ -146,144 +150,152 @@ public class ConnectionHandler implements Runnable {
 				// DONE: Fill in the rest of the code here
 				response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
 			}
-			else if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
-//				Map<String, String> header = request.getHeader();
-//				String date = header.get("if-modified-since");
-//				String hostName = header.get("host");
-//				
-				// Handling GET request here
-				// Get relative URI path from request
-				String uri = request.getUri();
-				// Get root directory path from server
-				String rootDirectory = server.getRootDirectory();
-				// Combine them together to form absolute file path
-				File file = new File(rootDirectory + uri);
-				// Check if the file exists
-				if(file.exists()) {
-					if(file.isDirectory()) {
-						// Look for default index.html file in a directory
-						String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
-						file = new File(location);
-						if(file.exists()) {
-							// Lets create 200 OK response
-							response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
-						}
-						else {
-							// File does not exist so lets create 404 file not found code
-							response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-						}
-					}
-					else { // Its a file
-						// Lets create 200 OK response
-						response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
-					}
+			else{
+				boolean plugin = checkForPlugin(request);
+				if(plugin){
+					response = handlePluginRequest(request);
 				}
 				else {
-					// File does not exist so lets create 404 file not found code
-					response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-				}
-			}
-			else if(request.getMethod().equalsIgnoreCase(Protocol.POST)) {
-				// Get relative uri path from Request
-				String uri = request.getUri();
-				// Get root directory from server
-				String rootDirectory = server.getRootDirectory();
-				// Combine them together to form absolute file path
-				File file = new File(rootDirectory + uri);
-				// Check if file exists
-				if(file.exists()) {
-					if(file.isDirectory()) {
-						// Look for default index.html file in a directory
-						String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
-						file = new File(location);
+					if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
+		//				Map<String, String> header = request.getHeader();
+		//				String date = header.get("if-modified-since");
+		//				String hostName = header.get("host");
+		//				
+						// Handling GET request here
+						// Get relative URI path from request
+						String uri = request.getUri();
+						// Get root directory path from server
+						String rootDirectory = server.getRootDirectory();
+						// Combine them together to form absolute file path
+						File file = new File(rootDirectory + uri);
+						// Check if the file exists
 						if(file.exists()) {
-							// use the post information
-							PrintWriter writer = new PrintWriter(location + ".put.txt", "UTF-8");
-							writer.println(request.getBody());
-							writer.close();
-							
-							// Lets create 200 OK response
-							response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+							if(file.isDirectory()) {
+								// Look for default index.html file in a directory
+								String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
+								file = new File(location);
+								if(file.exists()) {
+									// Lets create 200 OK response
+									response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+								}
+								else {
+									// File does not exist so lets create 404 file not found code
+									response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+								}
+							}
+							else { // Its a file
+								// Lets create 200 OK response
+								response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+							}
 						}
 						else {
 							// File does not exist so lets create 404 file not found code
 							response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 						}
 					}
-					else { // Its a file
-						// write put info to a file to be used later
-						PrintWriter writer = new PrintWriter(file.getAbsolutePath() + ".post.txt", "UTF-8");
+					else if(request.getMethod().equalsIgnoreCase(Protocol.POST)) {
+						// Get relative uri path from Request
+						String uri = request.getUri();
+						// Get root directory from server
+						String rootDirectory = server.getRootDirectory();
+						// Combine them together to form absolute file path
+						File file = new File(rootDirectory + uri);
+						// Check if file exists
+						if(file.exists()) {
+							if(file.isDirectory()) {
+								// Look for default index.html file in a directory
+								String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
+								file = new File(location);
+								if(file.exists()) {
+									// use the post information
+									PrintWriter writer = new PrintWriter(location + ".put.txt", "UTF-8");
+									writer.println(request.getBody());
+									writer.close();
+									
+									// Lets create 200 OK response
+									response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+								}
+								else {
+									// File does not exist so lets create 404 file not found code
+									response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+								}
+							}
+							else { // Its a file
+								// write put info to a file to be used later
+								PrintWriter writer = new PrintWriter(file.getAbsolutePath() + ".post.txt", "UTF-8");
+								writer.println(request.getBody());
+								writer.close();
+								
+								// Lets create 200 OK response
+								response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+							}
+						}
+						else {
+							// File does not exist so lets create 404 file not found code
+							response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+						}
+					}
+					else if(request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
+						// Get relative uri path from Request
+						String uri = request.getUri();
+						// Get root directory from server
+						String rootDirectory = server.getRootDirectory();
+						// Combine them together to form absolute file path
+						File file = new File(rootDirectory + uri);
+						
+						// Check if file exists
+						if(file.exists()) {
+							// Lets create 200 OK response
+							response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+						}
+						else {					
+							// Lets create 201 Created response
+							response = HttpResponseFactory.create201Created(file, Protocol.CLOSE);
+						}
+						
+						// put the body of the request into the file location
+						PrintWriter writer = new PrintWriter(file.getAbsolutePath(), "UTF-8");
 						writer.println(request.getBody());
 						writer.close();
-						
-						// Lets create 200 OK response
-						response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+					}
+					else if(request.getMethod().equalsIgnoreCase(Protocol.DELETE)) {
+						// Get relative uri path from Request
+						String uri = request.getUri();
+						// Get root directory from server
+						String rootDirectory = server.getRootDirectory();
+						// Combine them together to form absolute file path
+						File file = new File(rootDirectory + uri);
+						// Check if file exists
+						if(file.exists()) {
+							// Its a file
+							//delete the file
+							try{			 
+					    		if(file.delete()){
+					    			// Lets create 200 OK response
+									response = HttpResponseFactory.create200OK(null, Protocol.CLOSE);
+								}else{
+									
+									// For any other error, we will create bad request response as well
+									response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
+					    		}
+					 
+					    	}catch(Exception e){
+					 
+					    		e.printStackTrace();
+					    		// For any other error, we will create bad request response as well
+								response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
+					    	}
+						}
+						else {
+							// File does not exist so lets create 404 file not found code
+							response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+						}
+					}
+					else {
+						// File does not exist so lets create 404 file not found code
+						response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 					}
 				}
-				else {
-					// File does not exist so lets create 404 file not found code
-					response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-				}
-			}
-			else if(request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
-				// Get relative uri path from Request
-				String uri = request.getUri();
-				// Get root directory from server
-				String rootDirectory = server.getRootDirectory();
-				// Combine them together to form absolute file path
-				File file = new File(rootDirectory + uri);
-				
-				// Check if file exists
-				if(file.exists()) {
-					// Lets create 200 OK response
-					response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
-				}
-				else {					
-					// Lets create 201 Created response
-					response = HttpResponseFactory.create201Created(file, Protocol.CLOSE);
-				}
-				
-				// put the body of the request into the file location
-				PrintWriter writer = new PrintWriter(file.getAbsolutePath(), "UTF-8");
-				writer.println(request.getBody());
-				writer.close();
-			}
-			else if(request.getMethod().equalsIgnoreCase(Protocol.DELETE)) {
-				// Get relative uri path from Request
-				String uri = request.getUri();
-				// Get root directory from server
-				String rootDirectory = server.getRootDirectory();
-				// Combine them together to form absolute file path
-				File file = new File(rootDirectory + uri);
-				// Check if file exists
-				if(file.exists()) {
-					// Its a file
-					//delete the file
-					try{			 
-			    		if(file.delete()){
-			    			// Lets create 200 OK response
-							response = HttpResponseFactory.create200OK(null, Protocol.CLOSE);
-						}else{
-							
-							// For any other error, we will create bad request response as well
-							response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
-			    		}
-			 
-			    	}catch(Exception e){
-			 
-			    		e.printStackTrace();
-			    		// For any other error, we will create bad request response as well
-						response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
-			    	}
-				}
-				else {
-					// File does not exist so lets create 404 file not found code
-					response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-				}
-			}
-			else {
-				// File does not exist so lets create 404 file not found code
-				response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 			}
 		}
 		catch(Exception e) {
@@ -314,5 +326,25 @@ public class ConnectionHandler implements Runnable {
 		// Get the end time
 		long end = System.currentTimeMillis();
 		this.server.incrementServiceTime(end-start);
+	}
+
+	/**
+	 * @param request
+	 * @return
+	 */
+	private HttpResponse handlePluginRequest(HttpRequest request) {
+		String pluginName = request.getUri().split("/")[0];
+		
+		PluginInterface plugin = manager.getPlugins().get(pluginName);
+		return plugin.service(request);
+	}
+
+	/**
+	 * @param request
+	 * @return
+	 */
+	private boolean checkForPlugin(HttpRequest request) {
+		String plugin = request.getUri().split("/")[0];
+		return manager.checkForPlugin(plugin);
 	}
 }

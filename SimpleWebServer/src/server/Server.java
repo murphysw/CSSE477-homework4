@@ -61,8 +61,6 @@ public class Server implements Runnable {
 		try {
 			this.manager = new PluginManager(rootDirectory);
 			new Thread(manager).start();
-			System.out.println("Made it back to here");
-//			this.manager.watch();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -143,7 +141,7 @@ public class Server implements Runnable {
 				
 				// Create a handler for this incoming connection and start the handler in a new thread
 				
-				ConnectionHandler handler = new ConnectionHandler(this, connectionSocket);
+				ConnectionHandler handler = new ConnectionHandler(this, connectionSocket, manager);
 				
 				new Thread(handler).start();
 			}

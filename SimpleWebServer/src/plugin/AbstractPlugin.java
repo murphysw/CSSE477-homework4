@@ -24,7 +24,7 @@ import protocol.HttpResponse;
  * 
  * @author Team Otherguys
  */
-abstract class AbstractPlugin implements PluginInterface {
+public abstract class AbstractPlugin implements PluginInterface {
 	
 	HashMap<String,AbstractServlet> servlets;
 	
@@ -43,8 +43,8 @@ abstract class AbstractPlugin implements PluginInterface {
 			StringTokenizer st = new StringTokenizer(servletConfiguration," ");
 			String requestType = st.nextToken();
 			String servletName = st.nextToken();
-			String servletPath = st.nextToken();
-			try{
+			String servletClass = st.nextToken();
+			/*try{
 				File file = new File(servletPath); //This path will likely need to include .../plugins/<Plugin>/
 		        
 		        URI uri = file.toURI();
@@ -62,7 +62,21 @@ abstract class AbstractPlugin implements PluginInterface {
 		        classLoader.close(); //This might remove the class, but it warns us if we don't have it
 		    } catch (Exception e) {
 		        e.printStackTrace();
-		    } 
+		    } */
+			try {
+				Class sClass = Class.forName(servletClass);
+				AbstractServlet servlet = (AbstractServlet) sClass.newInstance();
+				servlets.put(servletName, servlet);
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 

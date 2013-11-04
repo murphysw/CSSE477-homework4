@@ -6,26 +6,27 @@ import protocol.HttpResponse;
 
 public abstract class AbstractServlet {
 	
-	public abstract void doDelete(HttpRequest request, HttpResponse response);
+	public abstract HttpResponse doDelete(HttpRequest request);
 	
-	public abstract void doGet(HttpRequest request, HttpResponse response);	
+	public abstract HttpResponse doGet(HttpRequest request);	
 	
-	public abstract void doPost(HttpRequest request, HttpResponse response);
+	public abstract HttpResponse doPost(HttpRequest request);
 	
-	public abstract void doPut(HttpRequest request, HttpResponse response);
+	public abstract HttpResponse doPut(HttpRequest request);
 	
-	public void service(HttpRequest request, HttpResponse response) {
+	public HttpResponse service(HttpRequest request) {
 		String method = request.getMethod().toUpperCase();
 		if (method.equals("DELETE"))
-			doDelete(request, response);
+			return doDelete(request);
 		else if (method.equals("GET"))
-			doGet(request, response);
+			return doGet(request);
 		else if (method.equals("POST"))
-			doPost(request, response);
+			return doPost(request);
 		else if (method.equals("PUT"))
-			doPut(request, response);
+			return doPut(request);
 		else 
-			System.out.println("[AbstractServlet] Requested method " + method + " not supported");		
+			System.out.println("[AbstractServlet] Requested method " + method + " not supported");
+		return null;
 	}
 	
 }
